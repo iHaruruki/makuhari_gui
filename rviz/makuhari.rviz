@@ -281,27 +281,9 @@ Visualization Manager:
           Value: true
         lsc_mount:
           Value: true
-        lucia_astra_camera_accel_frame:
-          Value: true
-        lucia_astra_camera_accel_optical_frame:
-          Value: true
-        lucia_astra_camera_color_frame:
-          Value: true
-        lucia_astra_camera_color_optical_frame:
-          Value: true
-        lucia_astra_camera_depth_frame:
-          Value: true
-        lucia_astra_camera_depth_optical_frame:
-          Value: true
-        lucia_astra_camera_gyro_frame:
-          Value: true
-        lucia_astra_camera_gyro_optical_frame:
-          Value: true
-        lucia_astra_camera_ir_frame:
-          Value: true
-        lucia_astra_camera_ir_optical_frame:
-          Value: true
         lucia_astra_camera_link:
+          Value: true
+        map:
           Value: true
         module1_lower_link:
           Value: true
@@ -369,72 +351,59 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        lucia_astra_camera_link:
-          lucia_astra_camera_depth_frame:
-            lucia_astra_camera_accel_frame:
-              lucia_astra_camera_accel_optical_frame:
-                {}
-            lucia_astra_camera_color_frame:
-              lucia_astra_camera_color_optical_frame:
-                {}
-            lucia_astra_camera_depth_optical_frame:
-              {}
-            lucia_astra_camera_gyro_frame:
-              lucia_astra_camera_gyro_optical_frame:
-                {}
-            lucia_astra_camera_ir_frame:
-              lucia_astra_camera_ir_optical_frame:
-                {}
-        odom:
-          base_footprint:
-            base_link:
-              aluminum_frame:
-                module1_lower_link:
-                  module1_roll_link:
-                    module1_pitch_link:
-                      module1_upper_link:
-                        module2_lower_link:
-                          module2_roll_link:
-                            module2_pitch_link:
-                              module2_upper_link:
-                                module3_lower_link:
-                                  module3_roll_link:
-                                    module3_pitch_link:
-                                      module3_upper_link:
-                                        module4_lower_link:
-                                          module4_roll_link:
-                                            module4_pitch_link:
-                                              module4_upper_link:
-                                                module5_lower_link:
-                                                  module5_roll_link:
-                                                    module5_pitch_link:
-                                                      module5_upper_link:
-                                                        module6_lower_link:
-                                                          module6_roll_link:
-                                                            module6_pitch_link:
-                                                              module6_upper_link:
-                                                                vital_arm_link:
-                                                                  {}
-              brio_100_link:
-                {}
-              front_left_wheel:
-                {}
-              front_right_wheel:
-                {}
-              lsc_mount:
-                laser_front:
-                  laser_front_calibrated:
-                    {}
-                laser_rear:
-                  laser_rear_calibrated:
-                    {}
-                unilidar_base:
-                  unilidar_lidar:
-                    {}
-              rear_left_wheel:
-                {}
-              rear_right_wheel:
-                {}
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                aluminum_frame:
+                  module1_lower_link:
+                    module1_roll_link:
+                      module1_pitch_link:
+                        module1_upper_link:
+                          module2_lower_link:
+                            module2_roll_link:
+                              module2_pitch_link:
+                                module2_upper_link:
+                                  module3_lower_link:
+                                    module3_roll_link:
+                                      module3_pitch_link:
+                                        module3_upper_link:
+                                          module4_lower_link:
+                                            module4_roll_link:
+                                              module4_pitch_link:
+                                                module4_upper_link:
+                                                  module5_lower_link:
+                                                    module5_roll_link:
+                                                      module5_pitch_link:
+                                                        module5_upper_link:
+                                                          module6_lower_link:
+                                                            module6_roll_link:
+                                                              module6_pitch_link:
+                                                                module6_upper_link:
+                                                                  vital_arm_link:
+                                                                    {}
+                brio_100_link:
+                  {}
+                front_left_wheel:
+                  {}
+                front_right_wheel:
+                  {}
+                lsc_mount:
+                  laser_front:
+                    laser_front_calibrated:
+                      {}
+                  laser_rear:
+                    laser_rear_calibrated:
+                      {}
+                  unilidar_base:
+                    unilidar_lidar:
+                      {}
+                lucia_astra_camera_link:
+                  {}
+                rear_left_wheel:
+                  {}
+                rear_right_wheel:
+                  {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -449,7 +418,7 @@ Visualization Manager:
       Color: 255; 25; 0
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 0
@@ -470,7 +439,7 @@ Visualization Manager:
         Value: /scan
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -820,7 +789,7 @@ Visualization Manager:
       Decay Time: 0
       Depth Map Topic: /lucia_astra_camera/depth/image_raw
       Depth Map Transport Hint: compressedDepth
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -839,11 +808,11 @@ Visualization Manager:
       Topic Filter: true
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_link
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -885,18 +854,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.1905830204486847
-        Y: 0.08495358377695084
-        Z: -0.4260602295398712
+        X: -0.8456897139549255
+        Y: -3.334221839904785
+        Z: -0.7666427493095398
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.35039854049682617
+      Pitch: 1.0853980779647827
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 3.145390033721924
+      Yaw: 3.1203887462615967
     Saved: ~
 Window Geometry:
   Displays:
