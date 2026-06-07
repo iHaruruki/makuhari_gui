@@ -28,7 +28,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'makuhari_gui_node = makuhari_gui.gui_main:main',
+            'navigation_mode_display_node = makuhari_gui.navigation_mode_display:main',
         ],
     },
 )

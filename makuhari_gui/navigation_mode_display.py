@@ -9,8 +9,8 @@ from rclpy.node import Node
 from std_msgs.msg import Bool
 import tkinter as tk
 from tkinter import font
-import threading
-import time
+import signal
+import sys
 
 class ModeDisplayNode(Node):
     """ROS 2 ノード: /reject_nav_vel トピックを購読"""
@@ -50,6 +50,7 @@ class ModeDisplayGUI:
     def __init__(self, root, node):
         self.root = root
         self.node = node
+        self.is_running = True
         
         # ウィンドウ設定
         self.root.title("ROS 2 Navigation Mode Display")
@@ -167,6 +168,9 @@ class ModeDisplayGUI:
     def update_loop(self):
         """定期的に UI を更新（50ms ごと）"""
         
+        if not self.is_running:
+            return
+        
         try:
             # ROS 2 スピン
             rclpy.spin_once(self.node, timeout_sec=0.01)
@@ -185,7 +189,8 @@ class ModeDisplayGUI:
             self.node.get_logger().error(f"Update error: {e}")
         
         # 50ms ごとに次の更新をスケジュール
-        self.root.after(50, self.update_loop)
+        if self.is_running:
+            self.root.after(50, self.update_loop)
     
     def update_mode_display(self):
         """モード表示と色を更新"""
@@ -212,10 +217,19 @@ class ModeDisplayGUI:
     
     def on_exit(self):
         """終了ボタン処理"""
+        self.is_running = False
         self.root.quit()
+
+def signal_handler(sig, frame):
+    """Ctrl+C シグナルハンドラー"""
+    print('\n\nInterrupted by user (Ctrl+C)')
+    sys.exit(0)
 
 def main():
     """メイン関数"""
+    
+    # Ctrl+C シグナルハンドラーを登録
+    signal.signal(signal.SIGINT, signal_handler)
     
     # ROS 2 初期化
     rclpy.init()
@@ -227,6 +241,7 @@ def main():
     
     # ウィンドウを閉じるときの処理
     def on_closing():
+        gui.is_running = False
         node.get_logger().info('Shutting down...')
         root.quit()
     
@@ -237,7 +252,9 @@ def main():
     except KeyboardInterrupt:
         node.get_logger().info('Interrupted by user')
     finally:
+        gui.is_running = False
         rclpy.shutdown()
+        print('Shutdown complete')
 
 if __name__ == '__main__':
     main()
