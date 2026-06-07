@@ -13,8 +13,8 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='robot',
-    maintainer_email='YOUR_EMAIL',
+    maintainer='Haruki Isono',
+    maintainer_email='haruki.isono861@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     extras_require={
@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'makuhari_gui_node = makuhari_gui.gui_main:main',
         ],
     },
 )

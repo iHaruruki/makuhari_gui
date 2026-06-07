@@ -4,8 +4,17 @@
   <name>makuhari_gui</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="YOUR_EMAIL">robot</maintainer>
+  <maintainer email="haruki.isono861@gmail.com">Haruki Isono</maintainer>
   <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <!-- 実行時依存 -->
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+
+  <!-- システム依存 -->
+  <exec_depend>python3-tk</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
