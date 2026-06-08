@@ -30,6 +30,7 @@ setup(
         'console_scripts': [
             'navigation_mode_display_node = makuhari_gui.navigation_mode_display:main',
             'vital_display_node = makuhari_gui.vital_display:main',
+            'tatto_display_node = makuhari_gui.tatto_display:main',
         ],
     },
 )
