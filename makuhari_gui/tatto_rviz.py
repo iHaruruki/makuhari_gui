@@ -2,7 +2,7 @@
 """
 ROS 2 Sensor Display Node using Tkinter
 Subscribes to sensor_values topic and displays sensor positions as circles
-Window is resizable and canvas scales dynamically
+Photoreflectors arranged on a hemisphere dome
 """
 
 import rclpy
@@ -52,7 +52,7 @@ class SensorDisplayNode(Node):
 
 
 class SensorDisplayGUI:
-    """Tkinter GUI: センサー値を可視化（ウィンドウサイズ動的対応）"""
+    """Tkinter GUI: 半球天頂配置のセンサー値を可視化"""
     
     def __init__(self, root, node):
         self.root = root
@@ -60,63 +60,61 @@ class SensorDisplayGUI:
         self.is_running = True
         
         # ウィンドウ設定
-        self.root.title("Tatto Display")
+        self.root.title("ROS 2 Hemispherical Photoreflector Display")
         self.root.geometry("1200x900")
         self.root.configure(bg='#1e1e1e')
         self.root.resizable(True, True)
         
         # パラメータ
-        self.base_image_side = node.image_side_
+        self.image_side = node.image_side_
         self.LOW = 30
         self.HIGH = 2000
         self.FIXED_MIN = 0.0
         self.SCOR = 1000.0
         self.SC = 0.7071  # sin(45°) * sqrt(2) / 2
-        
-        # フォント定義
-        self.title_font = font.Font(family="Arial", size=20, weight="bold")
-        self.status_font = font.Font(family="Arial", size=12)
-        self.info_font = font.Font(family="Arial", size=10)
-        
-        # キャンバスサイズ（動的に更新される）
-        self.canvas_size = self.base_image_side
-        self.image_side = self.base_image_side
         self.AB = self.image_side / 2
         self.image_scale = self.image_side / 500.0
         
+        # フォント定義
+        self.title_font = font.Font(family="Arial", size=20, weight="bold")
+        self.subtitle_font = font.Font(family="Arial", size=12, slant="italic")
+        self.status_font = font.Font(family="Arial", size=12)
+        self.info_font = font.Font(family="Arial", size=10)
+        
+        # センサー位置の計算（上面図 + 3D表現）
+        self.positions = self.calculate_positions()
+        
         self.setup_ui()
-        
-        # ウィンドウリサイズ時のイベントを登録
-        self.root.bind('<Configure>', self.on_window_resize)
-        
         self.update_loop()
     
-    def on_window_resize(self, event=None):
-        """ウィンドウリサイズイベント（キャンバスを再描画）"""
-        if event and hasattr(self, 'canvas'):
-            # キャンバスの新しいサイズを取得
-            self.canvas_size = min(event.width - 20, event.height - 280)
-            if self.canvas_size > 100:  # 最小サイズ制限
-                self.image_side = self.canvas_size
-                self.AB = self.image_side / 2
-                self.image_scale = self.image_side / 500.0
-    
     def calculate_positions(self):
-        """動的に計算されたセンサー位置"""
+        """
+        半球天頂配置のセンサー位置を計算
+        センサー配置:
+          0: 北西 (NW)
+          1: 北 (N)
+          2: 北東 (NE)
+          3: 西 (W)
+          4: 中央/天頂 (Top/Zenith)
+          5: 東 (E)
+          6: 南西 (SW)
+          7: 南 (S)
+          8: 南東 (SE)
+        """
         ab = self.AB
         s = self.image_scale
         sc = self.SC
         
         positions = [
-            (int(-125 * s * sc + ab), int(125 * s * sc + ab)),      # 0
-            (int(250 * s), int(125 * s)),                              # 1
-            (int(125 * s * sc + ab), int(125 * s * sc + ab)),         # 2
-            (int(125 * s), int(250 * s)),                              # 3
-            (int(250 * s), int(250 * s)),                              # 4 (center)
-            (int(375 * s), int(250 * s)),                              # 5
-            (int(-125 * s * sc + ab), int(-125 * s * sc + ab)),       # 6
-            (int(250 * s), int(375 * s)),                              # 7
-            (int(125 * s * sc + ab), int(-125 * s * sc + ab))         # 8
+            (int(-125 * s * sc + ab), int(125 * s * sc + ab)),      # 0: NW
+            (int(250 * s), int(125 * s)),                              # 1: N
+            (int(125 * s * sc + ab), int(125 * s * sc + ab)),         # 2: NE
+            (int(125 * s), int(250 * s)),                              # 3: W
+            (int(250 * s), int(250 * s)),                              # 4: 中央/天頂
+            (int(375 * s), int(250 * s)),                              # 5: E
+            (int(-125 * s * sc + ab), int(-125 * s * sc + ab)),       # 6: SW
+            (int(250 * s), int(375 * s)),                              # 7: S
+            (int(125 * s * sc + ab), int(-125 * s * sc + ab))         # 8: SE
         ]
         return positions
     
@@ -155,26 +153,44 @@ class SensorDisplayGUI:
         # === タイトル ===
         title_label = tk.Label(
             main_frame,
-            text="Sensor Display",
+            text="Hemispherical Photoreflector Array Display",
             font=self.title_font,
             bg='#1e1e1e',
             fg='white'
         )
-        title_label.pack(pady=(0, 10))
+        title_label.pack(pady=(0, 5))
         
-        # === キャンバスフレーム ===
+        subtitle_label = tk.Label(
+            main_frame,
+            text="Top-down view of photoreflectors arranged on hemisphere dome",
+            font=self.subtitle_font,
+            bg='#1e1e1e',
+            fg='#AAAAAA'
+        )
+        subtitle_label.pack(pady=(0, 10))
+        
+        # === キャンバスフレーム（上面図） ===
+        canvas_label = tk.Label(
+            main_frame,
+            text="Top View (Zenith Projection)",
+            font=font.Font(family="Arial", size=12, weight="bold"),
+            bg='#1e1e1e',
+            fg='#CCCCCC'
+        )
+        canvas_label.pack(pady=(10, 5))
+        
         canvas_frame = tk.Frame(main_frame, bg='#2a2a2a', relief=tk.SUNKEN, bd=2)
         canvas_frame.pack(fill=tk.BOTH, expand=True, pady=10)
         
         self.canvas = tk.Canvas(
             canvas_frame,
-            width=self.base_image_side,
-            height=self.base_image_side,
+            width=self.image_side,
+            height=self.image_side,
             bg='white',
             relief=tk.SUNKEN,
             bd=1
         )
-        self.canvas.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.canvas.pack(padx=5, pady=5)
         
         # === ステータス情報フレーム ===
         status_frame = tk.Frame(main_frame, bg='#1e1e1e')
@@ -190,25 +206,26 @@ class SensorDisplayGUI:
         )
         self.count_label.pack()
         
-        # キャンバスサイズ表示
-        self.size_label = tk.Label(
+        # センサー配置説明
+        layout_label = tk.Label(
             status_frame,
-            text=f"Canvas size: {self.image_side}x{self.image_side}",
+            text="Sensor Layout: 0=NW, 1=N, 2=NE | 3=W, 4=Zenith, 5=E | 6=SW, 7=S, 8=SE",
             font=self.info_font,
             bg='#1e1e1e',
-            fg='#888888'
+            fg='#999999'
         )
-        self.size_label.pack()
+        layout_label.pack()
         
         # センサー値表示
         sensor_frame = tk.Frame(main_frame, bg='#2a2a2a', relief=tk.SUNKEN, bd=2)
         sensor_frame.pack(fill=tk.X, pady=(10, 0))
         
         self.sensor_labels = []
+        sensor_names = ['NW', 'N', 'NE', 'W', 'Zenith', 'E', 'SW', 'S', 'SE']
         for i in range(9):
             lbl = tk.Label(
                 sensor_frame,
-                text=f"Sensor {i}: --",
+                text=f"S{i}({sensor_names[i]}): --",
                 font=self.info_font,
                 bg='#2a2a2a',
                 fg='#CCCCCC'
@@ -246,42 +263,82 @@ class SensorDisplayGUI:
         exit_button.pack(side=tk.RIGHT)
     
     def draw_sensor_display(self, normalized_values):
-        """センサー表示を描画"""
-        
-        # キャンバスサイズを取得
-        canvas_width = self.canvas.winfo_width()
-        canvas_height = self.canvas.winfo_height()
-        
-        # キャンバスサイズが有効でない場合はスキップ
-        if canvas_width <= 1 or canvas_height <= 1:
-            return
-        
-        # 正方形キャンバスを維持（小さい方のサイズを基準）
-        display_size = min(canvas_width, canvas_height)
-        self.image_side = display_size
-        self.AB = self.image_side / 2
-        self.image_scale = self.image_side / 500.0
+        """センサー表示を描画（半球天頂配置）"""
         
         # キャンバスをクリア
         self.canvas.delete("all")
         
         # 背景を白で塗りつぶし
         self.canvas.create_rectangle(
-            0, 0, canvas_width, canvas_height,
+            0, 0, self.image_side, self.image_side,
             fill='white', outline='white'
         )
         
-        # センサー位置を再計算
-        positions = self.calculate_positions()
+        # 半球ドームの円を描画（外枠）
+        dome_center_x = int(250 * self.image_scale)
+        dome_center_y = int(250 * self.image_scale)
+        dome_radius = int(125 * self.image_scale)
+        self.canvas.create_oval(
+            dome_center_x - dome_radius, dome_center_y - dome_radius,
+            dome_center_x + dome_radius, dome_center_y + dome_radius,
+            outline='#CCCCCC', width=3
+        )
+        
+        # 半球の方向ガイド（十字）
+        guide_length = int(140 * self.image_scale)
+        self.canvas.create_line(
+            dome_center_x, dome_center_y - guide_length,
+            dome_center_x, dome_center_y + guide_length,
+            fill='#DDDDDD', width=1, dash=(4, 4)
+        )
+        self.canvas.create_line(
+            dome_center_x - guide_length, dome_center_y,
+            dome_center_x + guide_length, dome_center_y,
+            fill='#DDDDDD', width=1, dash=(4, 4)
+        )
+        
+        # 方位ラベルを描画
+        label_offset = int(155 * self.image_scale)
+        directions = {
+            'N': (dome_center_x, dome_center_y - label_offset),
+            'S': (dome_center_x, dome_center_y + label_offset),
+            'E': (dome_center_x + label_offset, dome_center_y),
+            'W': (dome_center_x - label_offset, dome_center_y)
+        }
+        
+        for direction, (x, y) in directions.items():
+            self.canvas.create_text(
+                x, y,
+                text=direction,
+                font=('Arial', 12, 'bold'),
+                fill='#666666'
+            )
         
         # センサーサークルを描画
         for k in range(9):
-            x, y = positions[k]
+            x, y = self.positions[k]
             radius = int(15 * self.image_scale + (65 * self.image_scale * normalized_values[k]))
+            
+            # Zenith（中央）センサーは特別な色で表示
+            if k == 4:
+                fill_color = '#FF6600'  # オレンジ
+                outline_color = '#FF3300'  # 赤オレンジ
+            else:
+                fill_color = '#AAAAFF'  # 薄い青
+                outline_color = '#0000FF'  # 青
+            
             self.canvas.create_oval(
                 x - radius, y - radius,
                 x + radius, y + radius,
-                outline='blue', width=2
+                outline=outline_color, width=2, fill=fill_color
+            )
+            
+            # センサー番号を表示
+            self.canvas.create_text(
+                x, y,
+                text=str(k),
+                font=('Arial', 10, 'bold'),
+                fill='black'
             )
         
         # 代表点を計算
@@ -290,8 +347,8 @@ class SensorDisplayGUI:
         wy = 0.0
         
         for k in range(9):
-            wx += normalized_values[k] * positions[k][0]
-            wy += normalized_values[k] * positions[k][1]
+            wx += normalized_values[k] * self.positions[k][0]
+            wy += normalized_values[k] * self.positions[k][1]
             sumw += normalized_values[k]
         
         cx = int(250 * self.image_scale)
@@ -301,7 +358,7 @@ class SensorDisplayGUI:
             cx = int(wx / sumw)
             cy = int(wy / sumw)
         
-        # 代表点を描画（赤い点）
+        # 代表点を描画（赤い大きな点）
         ref_x = int((cx - self.AB) * 6 + self.AB)
         ref_y = int((cy - self.AB) * 6 + self.AB)
         ref_radius = 10
@@ -309,12 +366,7 @@ class SensorDisplayGUI:
         self.canvas.create_oval(
             ref_x - ref_radius, ref_y - ref_radius,
             ref_x + ref_radius, ref_y + ref_radius,
-            fill='red', outline='red'
-        )
-        
-        # キャンバスサイズを更新表示
-        self.size_label.config(
-            text=f"Canvas size: {self.image_side:.0f}x{self.image_side:.0f}"
+            fill='red', outline='darkred', width=2
         )
     
     def update_loop(self):
@@ -358,10 +410,8 @@ class SensorDisplayGUI:
         
         if not above_border:
             self.canvas.delete("all")
-            canvas_width = self.canvas.winfo_width()
-            canvas_height = self.canvas.winfo_height()
             self.canvas.create_rectangle(
-                0, 0, canvas_width, canvas_height,
+                0, 0, self.image_side, self.image_side,
                 fill='white', outline='white'
             )
             self.status_label.config(
@@ -377,9 +427,10 @@ class SensorDisplayGUI:
         self.draw_sensor_display(normalized)
         
         # センサー値ラベルを更新
+        sensor_names = ['NW', 'N', 'NE', 'W', 'Zenith', 'E', 'SW', 'S', 'SE']
         for i in range(9):
             self.sensor_labels[i].config(
-                text=f"S{i}: {sensor_data[i]:4d} ({normalized[i]:.2f})"
+                text=f"S{i}({sensor_names[i]}): {sensor_data[i]:4d} ({normalized[i]:.2f})"
             )
         
         # ステータス更新
