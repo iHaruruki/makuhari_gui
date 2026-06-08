@@ -9,7 +9,6 @@ from rclpy.node import Node
 from std_msgs.msg import UInt16MultiArray
 import tkinter as tk
 from tkinter import font
-from PIL import Image, ImageDraw
 import signal
 import sys
 import math
@@ -20,7 +19,10 @@ class SensorDisplayNode(Node):
     def __init__(self):
         super().__init__('sensor_display_node')
         self.declare_parameter('image_side', 1000)
-        self.image_side_ = self.get_parameter('image_side').as_int()
+        
+        # パラメータを取得（.value で値を取得）
+        param = self.get_parameter('image_side')
+        self.image_side_ = param.value
         
         self.sensor_data = [0] * 9
         self.message_count = 0
